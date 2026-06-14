@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { X } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { authService } from '@/services/auth.service';
@@ -14,7 +14,7 @@ export default function AuthModal({ onClose }: AuthModalProps) {
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState<string | null>(null);
 
-  async function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);

@@ -16,6 +16,7 @@ export interface INiche {
   instagram_url?: string;
   tiktok_url?: string;
   active: boolean;
+  product_count?: number;
 }
 
 export type TBadge = 'mais_vendido' | 'top_avaliado' | 'promocao' | 'destaque';

@@ -1,3 +1,10 @@
+export interface IUser {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url?: string;
+}
+
 export interface IStore {
   id: string;
   slug: string;

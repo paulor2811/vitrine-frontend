@@ -1,28 +1,28 @@
 export interface IStore {
-  id: number;
+  id: string;
   slug: string;
   name: string;
   color: string;
-  textColor: string;
+  text_color: string;
 }
 
 export interface INiche {
-  id: number;
+  id: string;
   slug: string;
   name: string;
   description: string;
   icon: string;
+  bg_color: string;
   instagram_url?: string;
   tiktok_url?: string;
-  product_count: number;
-  bg_color: string;
+  active: boolean;
 }
 
 export type TBadge = 'mais_vendido' | 'top_avaliado' | 'promocao' | 'destaque';
 
 export interface IProduct {
-  id: number;
-  niche_id: number;
+  id: string;
+  niche_id: string;
   store: IStore;
   name: string;
   description?: string;
@@ -34,6 +34,7 @@ export interface IProduct {
   badge?: TBadge;
   rating?: number;
   rating_count?: number;
+  active: boolean;
 }
 
 export interface IApiResponse<T> {

@@ -2,24 +2,24 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import ProductCard from '@/components/ProductCard/ProductCard';
 import SkeletonCard from '@/components/ui/SkeletonCard';
+import { useNiches } from '@/hooks/useNiches';
 import { useProducts } from '@/hooks/useProducts';
-import { niches } from '@/data/mock';
 
 export default function Niche() {
   const { slug } = useParams<{ slug: string }>();
-  const navigate = useNavigate();
-  const niche = niches.find(n => n.slug === slug);
-  const { products, loading } = useProducts(slug ?? '');
+  const navigate  = useNavigate();
+  const { niches, loading: nichesLoading } = useNiches();
+  const niche    = niches.find(n => n.slug === slug);
+  const { products, loading: productsLoading } = useProducts(niche?.id ?? '');
 
-  if (!loading && !niche) {
+  const loading = nichesLoading || productsLoading;
+
+  if (!nichesLoading && !niche) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 bg-slate-50">
         <span className="text-6xl">😕</span>
         <p className="text-slate-600 text-center font-medium">Categoria não encontrada.</p>
-        <button
-          onClick={() => navigate('/')}
-          className="text-orange-500 font-bold text-sm"
-        >
+        <button onClick={() => navigate('/')} className="text-orange-500 font-bold text-sm">
           ← Voltar ao início
         </button>
       </div>
@@ -28,7 +28,6 @@ export default function Niche() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header sticky */}
       <header className="sticky top-0 z-10 bg-white border-b border-slate-100 px-3 py-3 flex items-center gap-2 shadow-sm">
         <button
           onClick={() => navigate('/')}
@@ -63,14 +62,12 @@ export default function Niche() {
         )}
       </header>
 
-      {/* Descrição */}
       {niche && (
         <div className="px-4 py-3 bg-white border-b border-slate-100">
           <p className="text-xs text-slate-500 leading-relaxed">{niche.description}</p>
         </div>
       )}
 
-      {/* Grid de produtos */}
       <main className="px-3 py-4 max-w-lg mx-auto">
         <div className="grid grid-cols-2 gap-3">
           {loading

@@ -6,7 +6,7 @@ export default function StoreBadge({ store }: StoreBadgeProps) {
   return (
     <span
       className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full"
-      style={{ backgroundColor: store.color, color: store.textColor }}
+      style={{ backgroundColor: store.color, color: store.text_color }}
     >
       {store.name}
     </span>

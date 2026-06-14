@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { useNiches } from '@/hooks/useNiches';
 import ProductCardSmall from '@/components/ProductCard/ProductCardSmall';
+import AuthButton from '@/components/AuthButton/AuthButton';
 // TODO: replace with useProducts API hook when backend is ready
 import { products as allProducts } from '@/data/mock';
 import type { INiche } from '@/types';
@@ -55,7 +56,7 @@ export default function Home() {
             <span className="text-orange-500 font-extrabold text-xl tracking-tight">Vitrine</span>
             <span className="text-[10px] text-slate-400 font-medium">• Achados que valem</span>
           </div>
-          <span className="text-xs text-slate-400 font-medium">🔒 Compra segura</span>
+          <AuthButton />
         </div>
       </header>
 

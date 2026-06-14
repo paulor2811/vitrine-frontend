@@ -1,5 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
+import AuthButton from '@/components/AuthButton/AuthButton';
 import ProductCard from '@/components/ProductCard/ProductCard';
 import SkeletonCard from '@/components/ui/SkeletonCard';
 import { useNiches } from '@/hooks/useNiches';
@@ -49,17 +50,20 @@ export default function Niche() {
           </div>
         </div>
 
-        {niche?.instagram_url && (
-          <a
-            href={niche.instagram_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-1.5 text-slate-400 rounded-lg"
-            aria-label="Ver no Instagram"
-          >
-            <ExternalLink size={19} />
-          </a>
-        )}
+        <div className="flex items-center gap-1">
+          {niche?.instagram_url && (
+            <a
+              href={niche.instagram_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-1.5 text-slate-400 rounded-lg"
+              aria-label="Ver no Instagram"
+            >
+              <ExternalLink size={19} />
+            </a>
+          )}
+          <AuthButton />
+        </div>
       </header>
 
       {niche && (

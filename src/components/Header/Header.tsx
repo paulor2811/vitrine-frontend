@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { ShoppingBag, LogIn, LogOut } from 'lucide-react';
+import { ShoppingBag, LogIn, LogOut, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import AuthModal from '@/components/AuthModal/AuthModal';
+import config from '@/services/config.service';
 
 export default function Header() {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -26,6 +27,17 @@ export default function Header() {
                 <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
+              )}
+                {isAdmin && (
+                <a
+                  href={`${config.apiUrl}/admin`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-orange-400 active:text-orange-200 transition-colors p-1"
+                  aria-label="Painel admin"
+                >
+                  <LayoutDashboard size={18} />
+                </a>
               )}
               <button
                 onClick={logout}

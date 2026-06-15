@@ -19,4 +19,7 @@ export const authService = {
 
   googleRedirectUrl: () =>
     `${config.apiUrl}/auth/google/redirect`,
+
+  setPassword: (data: { password: string; password_confirmation: string; current_password?: string }) =>
+    api.post<IApiResponse<null>>('/auth/password', data),
 };

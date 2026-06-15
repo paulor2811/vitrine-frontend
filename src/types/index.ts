@@ -4,6 +4,7 @@ export interface IUser {
   email: string;
   avatar_url?: string;
   is_admin: boolean;
+  has_password: boolean;
 }
 
 export interface IStore {

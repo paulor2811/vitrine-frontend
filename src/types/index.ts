@@ -3,6 +3,7 @@ export interface IUser {
   name: string;
   email: string;
   avatar_url?: string;
+  is_admin: boolean;
 }
 
 export interface IStore {

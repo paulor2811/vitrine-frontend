@@ -2,6 +2,7 @@ import { ArrowRight, ShoppingCart } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import StarRating from '@/components/ui/StarRating';
 import StoreBadge from '@/components/ui/StoreBadge';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import type { IProduct } from '@/types';
 
 function formatPrice(value: number): string {
@@ -17,6 +18,7 @@ interface ProductCardProps { product: IProduct }
 export default function ProductCard({ product }: ProductCardProps) {
   const { price, original_price, badge, rating, rating_count, name, image_url, affiliate_url, store } = product;
   const discount = price && original_price ? calcDiscount(price, original_price) : null;
+  const { track } = useAnalytics();
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col">
@@ -73,6 +75,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             target="_blank"
             rel="noopener noreferrer sponsored"
             aria-label={`Ver oferta de ${name} na ${store.name}`}
+            onClick={() => track('product_click', { product_id: product.id, store_id: store.id, niche_id: product.niche_id })}
             className="flex items-center justify-center gap-1.5 w-full bg-orange-500 hover:bg-orange-600 active:scale-95 text-white text-sm font-bold py-2.5 rounded-xl transition-all"
           >
             <ShoppingCart size={14} />

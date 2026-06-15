@@ -1,22 +1,32 @@
 import { useEffect, useState } from 'react';
 import type { IProduct } from '@/types';
-import { products as mockProducts } from '@/data/mock';
+import { productService } from '@/services/product.service';
 
-export function useProducts(nicheId: string) {
+export function useProducts(nicheSlug: string) {
   const [products, setProducts] = useState<IProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!nicheId) { setLoading(false); return; }
+    if (!nicheSlug) {
+      setLoading(false);
+      return;
+    }
 
-    // TODO: swap for api.get<IApiResponse<IProduct[]>>(`/niches/${nicheId}/products`)
-    const filtered = mockProducts.filter(p => p.niche_id === nicheId && p.active);
-    setProducts([
-      ...filtered.filter(p => p.featured),
-      ...filtered.filter(p => !p.featured),
-    ]);
-    setLoading(false);
-  }, [nicheId]);
+    setLoading(true);
+    setError(null);
 
-  return { products, loading };
+    productService.listByNiche(nicheSlug)
+      .then(res => {
+        const sorted = [
+          ...res.data.filter(p => p.featured),
+          ...res.data.filter(p => !p.featured),
+        ];
+        setProducts(sorted);
+      })
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [nicheSlug]);
+
+  return { products, loading, error };
 }

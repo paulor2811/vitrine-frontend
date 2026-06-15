@@ -6,6 +6,7 @@ import type { IApiResponse, IUser } from '@/types';
 interface IAuthContext {
   user: IUser | null;
   loading: boolean;
+  isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -96,7 +97,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (refreshTimer.current) clearTimeout(refreshTimer.current);
   }
 
-  return createElement(AuthContext.Provider, { value: { user, loading, login, logout } }, children);
+  const isAdmin = user?.is_admin === true;
+
+  return createElement(AuthContext.Provider, { value: { user, loading, isAdmin, login, logout } }, children);
 }
 
 export function useAuth(): IAuthContext {

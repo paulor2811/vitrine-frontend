@@ -3,6 +3,7 @@ export interface IUser {
   name: string;
   email: string;
   avatar_url?: string;
+  is_admin: boolean;
 }
 
 export interface IStore {
@@ -23,7 +24,7 @@ export interface INiche {
   instagram_url?: string;
   tiktok_url?: string;
   active: boolean;
-  product_count?: number;
+  products_count?: number;
 }
 
 export type TBadge = 'mais_vendido' | 'top_avaliado' | 'promocao' | 'destaque';

@@ -30,13 +30,20 @@ export interface INiche {
 
 export type TBadge = 'mais_vendido' | 'top_avaliado' | 'promocao' | 'destaque';
 
+export interface IProductMedia {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+}
+
 export interface IProduct {
   id: string;
   niche_id: string;
+  niche?: Pick<INiche, 'id' | 'slug' | 'name' | 'icon'>;
   store: IStore;
   name: string;
   description?: string;
-  image_url: string;
+  image_url: string | null;
   price?: number;
   original_price?: number;
   affiliate_url: string;
@@ -45,6 +52,7 @@ export interface IProduct {
   rating?: number;
   rating_count?: number;
   active: boolean;
+  media?: IProductMedia[];
 }
 
 export interface IApiResponse<T> {

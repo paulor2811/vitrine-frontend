@@ -84,7 +84,7 @@ export default function Niche() {
         <div className="grid grid-cols-2 gap-3">
           {loading
             ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-            : products.map(p => <ProductCard key={p.id} product={p} />)
+            : products.map(p => <ProductCard key={p.id} product={p} nicheSlug={slug} />)
           }
         </div>
 

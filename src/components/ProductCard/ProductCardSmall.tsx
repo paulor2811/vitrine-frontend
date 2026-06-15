@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import StoreBadge from '@/components/ui/StoreBadge';
@@ -8,24 +9,37 @@ function formatPrice(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-interface ProductCardSmallProps { product: IProduct }
+interface ProductCardSmallProps {
+  product: IProduct;
+  nicheSlug?: string;
+}
 
-export default function ProductCardSmall({ product }: ProductCardSmallProps) {
+export default function ProductCardSmall({ product, nicheSlug }: ProductCardSmallProps) {
   const { name, image_url, price, original_price, affiliate_url, store, badge } = product;
   const discount = price && original_price ? Math.round((1 - price / original_price) * 100) : null;
   const { track } = useAnalytics();
+  const navigate = useNavigate();
+
+  const productPath = nicheSlug ? `/${nicheSlug}/${product.id}` : undefined;
+
+  const handleClick = () => {
+    track('product_click', { product_id: product.id, store_id: store.id, niche_id: product.niche_id });
+    if (productPath) {
+      navigate(productPath);
+    } else {
+      window.open(affiliate_url, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   return (
-    <a
-      href={affiliate_url}
-      target="_blank"
-      rel="noopener noreferrer sponsored"
-      aria-label={`Ver ${name} na ${store.name}`}
-      onClick={() => track('product_click', { product_id: product.id, store_id: store.id, niche_id: product.niche_id })}
-      className="flex-shrink-0 w-40 bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col active:scale-95 transition-transform"
+    <div
+      onClick={handleClick}
+      className="flex-shrink-0 w-40 bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col active:scale-95 transition-transform cursor-pointer"
     >
       <div className="relative aspect-square bg-slate-50">
-        <img src={image_url} alt={name} className="w-full h-full object-cover" loading="lazy" />
+        {image_url && (
+          <img src={image_url} alt={name} className="w-full h-full object-cover" loading="lazy" />
+        )}
         {badge && (
           <div className="absolute top-1.5 left-1.5">
             <Badge type={badge} />
@@ -62,6 +76,6 @@ export default function ProductCardSmall({ product }: ProductCardSmallProps) {
           </div>
         </div>
       </div>
-    </a>
+    </div>
   );
 }

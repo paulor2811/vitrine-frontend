@@ -1,7 +1,7 @@
-import { createContext, useContext, useEffect, useState, type ReactNode, createElement } from 'react';
-import { api } from '@/services/api.service';
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode, createElement } from 'react';
+import { api, setUnauthorizedHandler } from '@/services/api.service';
 import { authService } from '@/services/auth.service';
-import type { IUser } from '@/types';
+import type { IApiResponse, IUser } from '@/types';
 
 interface IAuthContext {
   user: IUser | null;
@@ -13,37 +13,79 @@ interface IAuthContext {
 const AuthContext = createContext<IAuthContext | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<IUser | null>(null);
+  const [user, setUser]       = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const refreshTimer          = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  async function doRefresh(): Promise<void> {
+    try {
+      const res = await api.post<IApiResponse<{ expires_in: number }>>('/auth/refresh', {});
+      // Cookie já foi renovado pelo servidor; agenda o próximo refresh
+      // Como não temos o novo token aqui, agendamos baseado em expires_in
+      if (res.success && res.data?.expires_in) {
+        const msUntilRefresh = (res.data.expires_in - 60) * 1000;
+        if (refreshTimer.current) clearTimeout(refreshTimer.current);
+        if (msUntilRefresh > 0) {
+          refreshTimer.current = setTimeout(() => void doRefresh(), msUntilRefresh);
+        }
+      }
+    } catch {
+      setUser(null);
+    }
+  }
+
+  async function loadUser(): Promise<void> {
+    try {
+      const res = await api.get<IApiResponse<IUser>>('/auth/me');
+      setUser(res.data);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
+    // Remove ?token_issued=1 da URL após callback do Google OAuth
     const params = new URLSearchParams(window.location.search);
-    const token = params.get('token');
-    if (token) {
-      api.setToken(token);
+    if (params.get('token_issued')) {
       window.history.replaceState({}, '', window.location.pathname);
     }
 
-    if (api.hasToken()) {
-      authService.me()
-        .then(res => setUser(res.data))
-        .catch(() => api.clearToken())
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    setUnauthorizedHandler(() => {
+      setUser(null);
+      if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    });
+
+    void loadUser();
+
+    return () => {
+      if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    };
   }, []);
+
+  // Agenda refresh proativo sempre que o user mudar (login / me)
+  // O access_token está no cookie HttpOnly, então buscamos expires_in do servidor
+  // e agendamos baseado nisso (900s = 15min, 60s de antecedência)
+  useEffect(() => {
+    if (!user) return;
+    if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    const msUntilRefresh = (900 - 60) * 1000; // 14 min
+    refreshTimer.current = setTimeout(() => void doRefresh(), msUntilRefresh);
+    return () => {
+      if (refreshTimer.current) clearTimeout(refreshTimer.current);
+    };
+  }, [user]);
 
   async function login(email: string, password: string): Promise<void> {
     const res = await authService.login(email, password);
-    api.setToken(res.data.token);
     setUser(res.data.user);
   }
 
   async function logout(): Promise<void> {
     await authService.logout().catch(() => {});
-    api.clearToken();
     setUser(null);
+    if (refreshTimer.current) clearTimeout(refreshTimer.current);
   }
 
   return createElement(AuthContext.Provider, { value: { user, loading, login, logout } }, children);

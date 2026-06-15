@@ -3,8 +3,8 @@ import config from './config.service';
 import type { IApiResponse, IUser } from '@/types';
 
 interface ILoginResponse {
-  token: string;
   user: IUser;
+  expires_in: number;
 }
 
 export const authService = {
@@ -12,10 +12,10 @@ export const authService = {
     api.post<IApiResponse<ILoginResponse>>('/auth/login', { email, password }),
 
   me: () =>
-    api.get<IApiResponse<IUser>>('/auth/me', true),
+    api.get<IApiResponse<IUser>>('/auth/me'),
 
   logout: () =>
-    api.post<IApiResponse<null>>('/auth/logout', {}, true),
+    api.post<IApiResponse<null>>('/auth/logout', {}),
 
   googleRedirectUrl: () =>
     `${config.apiUrl}/auth/google/redirect`,

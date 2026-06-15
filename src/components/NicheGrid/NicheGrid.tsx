@@ -18,7 +18,7 @@ export default function NicheGrid({ niches }: NicheGridProps) {
         >
           <span className="text-3xl mb-2 leading-none">{niche.icon}</span>
           <span className="font-bold text-slate-800 text-sm leading-tight">{niche.name}</span>
-          <span className="text-xs text-slate-500 mt-1">{niche.product_count} produtos</span>
+          <span className="text-xs text-slate-500 mt-1">{niche.products_count} produtos</span>
           <ChevronRight size={15} className="absolute top-3.5 right-3 text-slate-400" />
         </button>
       ))}

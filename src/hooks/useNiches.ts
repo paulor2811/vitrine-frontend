@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import type { INiche } from '@/types';
-import { niches as mockNiches } from '@/data/mock';
+import { nicheService } from '@/services/niche.service';
 
 export function useNiches() {
   const [niches, setNiches] = useState<INiche[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // TODO: swap for api.get<IApiResponse<INiche[]>>('/niches')
-    setNiches(mockNiches);
-    setLoading(false);
+    nicheService.list()
+      .then(res => setNiches(res.data))
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false));
   }, []);
 
-  return { niches, loading };
+  return { niches, loading, error };
 }

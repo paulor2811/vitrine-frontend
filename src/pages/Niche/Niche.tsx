@@ -1,21 +1,29 @@
+import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import AuthButton from '@/components/AuthButton/AuthButton';
 import ProductCard from '@/components/ProductCard/ProductCard';
 import SkeletonCard from '@/components/ui/SkeletonCard';
-import { useNiches } from '@/hooks/useNiches';
+import { useNiche } from '@/hooks/useNiche';
 import { useProducts } from '@/hooks/useProducts';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 export default function Niche() {
-  const { slug } = useParams<{ slug: string }>();
-  const navigate  = useNavigate();
-  const { niches, loading: nichesLoading } = useNiches();
-  const niche    = niches.find(n => n.slug === slug);
-  const { products, loading: productsLoading } = useProducts(niche?.id ?? '');
+  const { slug = '' } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const { niche, loading: nicheLoading, notFound } = useNiche(slug);
+  const { products, loading: productsLoading } = useProducts(slug);
+  const { track } = useAnalytics();
 
-  const loading = nichesLoading || productsLoading;
+  const loading = nicheLoading || productsLoading;
 
-  if (!nichesLoading && !niche) {
+  useEffect(() => {
+    if (niche) {
+      track('niche_view', { niche_id: niche.id });
+    }
+  }, [niche, track]);
+
+  if (!nicheLoading && notFound) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 bg-slate-50">
         <span className="text-6xl">😕</span>

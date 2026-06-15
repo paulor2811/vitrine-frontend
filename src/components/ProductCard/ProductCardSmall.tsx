@@ -1,6 +1,7 @@
 import { ShoppingCart } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import StoreBadge from '@/components/ui/StoreBadge';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import type { IProduct } from '@/types';
 
 function formatPrice(value: number): string {
@@ -12,6 +13,7 @@ interface ProductCardSmallProps { product: IProduct }
 export default function ProductCardSmall({ product }: ProductCardSmallProps) {
   const { name, image_url, price, original_price, affiliate_url, store, badge } = product;
   const discount = price && original_price ? Math.round((1 - price / original_price) * 100) : null;
+  const { track } = useAnalytics();
 
   return (
     <a
@@ -19,6 +21,7 @@ export default function ProductCardSmall({ product }: ProductCardSmallProps) {
       target="_blank"
       rel="noopener noreferrer sponsored"
       aria-label={`Ver ${name} na ${store.name}`}
+      onClick={() => track('product_click', { product_id: product.id, store_id: store.id, niche_id: product.niche_id })}
       className="flex-shrink-0 w-40 bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col active:scale-95 transition-transform"
     >
       <div className="relative aspect-square bg-slate-50">

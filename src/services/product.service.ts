@@ -7,4 +7,7 @@ export const productService = {
 
   featured: () =>
     api.get<IApiResponse<IProduct[]>>('/products/featured'),
+
+  getById: (nicheSlug: string, productId: string) =>
+    api.get<IApiResponse<IProduct>>(`/niches/${nicheSlug}/products/${productId}`),
 };

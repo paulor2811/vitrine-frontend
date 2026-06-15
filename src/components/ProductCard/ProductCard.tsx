@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { ArrowRight, ShoppingCart } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import StarRating from '@/components/ui/StarRating';
@@ -13,42 +14,56 @@ function calcDiscount(price: number, original: number): number {
   return Math.round((1 - price / original) * 100);
 }
 
-interface ProductCardProps { product: IProduct }
+interface ProductCardProps {
+  product: IProduct;
+  nicheSlug?: string;
+}
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, nicheSlug }: ProductCardProps) {
   const { price, original_price, badge, rating, rating_count, name, image_url, affiliate_url, store } = product;
   const discount = price && original_price ? calcDiscount(price, original_price) : null;
   const { track } = useAnalytics();
 
+  const productPath = nicheSlug ? `/${nicheSlug}/${product.id}` : undefined;
+
+  const imageArea = (
+    <div className="relative aspect-square bg-slate-50">
+      {image_url && (
+        <img src={image_url} alt={name} className="w-full h-full object-cover" loading="lazy" />
+      )}
+      {badge && (
+        <div className="absolute top-2 left-2">
+          <Badge type={badge} />
+        </div>
+      )}
+      {discount !== null && (
+        <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">
+          -{discount}%
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col">
-      {/* Imagem */}
-      <div className="relative aspect-square bg-slate-50">
-        <img
-          src={image_url}
-          alt={name}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
-        {badge && (
-          <div className="absolute top-2 left-2">
-            <Badge type={badge} />
-          </div>
-        )}
-        {discount !== null && (
-          <div className="absolute top-2 right-2 bg-red-500 text-white text-[10px] font-extrabold px-1.5 py-0.5 rounded-full">
-            -{discount}%
-          </div>
-        )}
-      </div>
+      {/* Imagem — clicável para a página do produto */}
+      {productPath ? (
+        <Link to={productPath} className="block">
+          {imageArea}
+        </Link>
+      ) : imageArea}
 
       {/* Conteúdo */}
       <div className="p-3 flex flex-col flex-1 gap-2">
         <StoreBadge store={store} />
 
-        <p className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2">
-          {name}
-        </p>
+        {productPath ? (
+          <Link to={productPath} className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2">
+            {name}
+          </Link>
+        ) : (
+          <p className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2">{name}</p>
+        )}
 
         {rating !== undefined && rating_count !== undefined && (
           <StarRating rating={rating} count={rating_count} />

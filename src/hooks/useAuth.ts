@@ -7,6 +7,8 @@ interface IAuthContext {
   user: IUser | null;
   loading: boolean;
   isAdmin: boolean;
+  needsPasswordSetup: boolean;
+  onPasswordSet: () => void;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -97,9 +99,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (refreshTimer.current) clearTimeout(refreshTimer.current);
   }
 
-  const isAdmin = user?.is_admin === true;
+  const isAdmin            = user?.is_admin === true;
+  const needsPasswordSetup = user !== null && user.has_password === false;
 
-  return createElement(AuthContext.Provider, { value: { user, loading, isAdmin, login, logout } }, children);
+  function onPasswordSet(): void {
+    if (user) setUser({ ...user, has_password: true });
+  }
+
+  return createElement(AuthContext.Provider, { value: { user, loading, isAdmin, needsPasswordSetup, onPasswordSet, login, logout } }, children);
 }
 
 export function useAuth(): IAuthContext {

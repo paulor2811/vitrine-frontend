@@ -95,7 +95,7 @@ export default function ProductPage() {
               </h1>
 
               {/* Avaliação */}
-              {product.rating !== undefined && product.rating_count !== undefined && (
+              {product.rating != null && product.rating_count != null && (
                 <StarRating rating={product.rating} count={product.rating_count} />
               )}
 

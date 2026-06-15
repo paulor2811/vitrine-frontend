@@ -1,6 +1,6 @@
 import config from './config.service';
 
-export type TEventType = 'page_view' | 'niche_view' | 'product_impression' | 'product_click';
+export type TEventType = 'page_view' | 'niche_view' | 'product_impression' | 'product_click' | 'product_view';
 
 export interface IEventPayload {
   session_id: string;

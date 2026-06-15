@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { authService } from '@/services/auth.service';
+import { LogOut } from 'lucide-react';
 
 export default function SetPasswordModal() {
-  const { user, onPasswordSet } = useAuth();
+  const { user, onPasswordSet, logout } = useAuth();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm]   = useState('');
   const [error, setError]       = useState('');
@@ -38,8 +39,15 @@ export default function SetPasswordModal() {
   return (
     <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col">
       {/* Header simples */}
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-slate-800">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
         <span className="text-orange-500 font-bold text-lg tracking-tight">vitrine</span>
+        <button
+          onClick={() => void logout()}
+          className="flex items-center gap-1.5 text-slate-400 hover:text-white text-sm transition-colors"
+        >
+          <LogOut size={15} />
+          Sair
+        </button>
       </div>
 
       {/* Conteúdo central */}

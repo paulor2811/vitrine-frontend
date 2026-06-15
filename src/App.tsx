@@ -1,17 +1,29 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from '@/hooks/useAuth';
+import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import Home from '@/pages/Home/Home';
 import Niche from '@/pages/Niche/Niche';
+import SetPasswordModal from '@/components/SetPasswordModal/SetPasswordModal';
 
-export default function App() {
+function AppRoutes() {
+  const { needsPasswordSetup } = useAuth();
+
   return (
-    <AuthProvider>
+    <>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/:slug" element={<Niche />} />
         </Routes>
       </BrowserRouter>
+      {needsPasswordSetup && <SetPasswordModal />}
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
     </AuthProvider>
   );
 }

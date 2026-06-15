@@ -34,7 +34,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  function hasSessionCookie(): boolean {
+    return document.cookie.split(';').some(c => c.trim().startsWith('vitrine_session='));
+  }
+
   async function loadUser(): Promise<void> {
+    if (!hasSessionCookie()) {
+      setLoading(false);
+      return;
+    }
     try {
       const res = await api.get<IApiResponse<IUser>>('/auth/me');
       setUser(res.data);

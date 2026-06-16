@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ShoppingCart, ShieldCheck } from 'lucide-react';
 import MediaCarousel from '@/components/MediaCarousel/MediaCarousel';
 import Badge from '@/components/ui/Badge';
 import StarRating from '@/components/ui/StarRating';
@@ -42,6 +42,9 @@ export default function ProductPage() {
   const discount = price && original_price
     ? Math.round((1 - price / original_price) * 100)
     : null;
+  const savings = price && original_price && original_price > price
+    ? original_price - price
+    : null;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -57,7 +60,7 @@ export default function ProductPage() {
             <ArrowLeft size={21} />
           </button>
           <p className="font-bold text-slate-800 text-sm truncate flex-1 leading-tight">
-            {loading ? ' ' : (product?.name ?? '')}
+            {loading ? ' ' : (product?.name ?? '')}
           </p>
         </header>
 
@@ -72,7 +75,7 @@ export default function ProductPage() {
         )}
 
         {/* Informações do produto */}
-        <div className="flex-1 px-4 pt-4 pb-28">
+        <div className="flex-1 px-4 pt-4 pb-36">
           {loading ? (
             <div className="space-y-3 mt-1">
               <div className="h-3 bg-slate-200 rounded animate-pulse w-20" />
@@ -99,39 +102,52 @@ export default function ProductPage() {
                 <StarRating rating={product.rating} count={product.rating_count} />
               )}
 
-              {/* Preço */}
-              <div>
-                {price !== undefined ? (
-                  <div className="flex items-baseline gap-2 flex-wrap">
-                    <span className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              {/* Bloco de preço */}
+              {price !== undefined ? (
+                <div className="space-y-2.5">
+
+                  {/* Preço atual + original */}
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
                       {formatPrice(price)}
                     </span>
                     {original_price && (
-                      <span className="text-sm text-slate-400 line-through">
+                      <span className="text-base text-slate-400 line-through">
                         {formatPrice(original_price)}
                       </span>
                     )}
-                    {discount !== null && (
-                      <span className="text-xs bg-red-100 text-red-600 font-bold px-2 py-0.5 rounded-full">
-                        -{discount}%
-                      </span>
-                    )}
                   </div>
-                ) : (
-                  <p className="text-slate-400 text-sm">Ver preço na loja</p>
-                )}
-              </div>
+
+                  {/* Desconto + Economia */}
+                  {(discount !== null || savings !== null) && (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {discount !== null && (
+                        <span className="bg-red-500 text-white font-extrabold text-sm px-3 py-1 rounded-lg">
+                          -{discount}% OFF
+                        </span>
+                      )}
+                      {savings !== null && (
+                        <span className="bg-emerald-50 text-emerald-700 font-bold text-sm px-3 py-1 rounded-lg border border-emerald-100">
+                          Você economiza {formatPrice(savings)}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                </div>
+              ) : (
+                <p className="text-slate-400 text-sm">Ver preço na loja</p>
+              )}
 
               {/* Descrição */}
               {product.description && (
                 <p className="text-sm text-slate-600 leading-relaxed">{product.description}</p>
               )}
 
-              {/* Disclaimer */}
-              <div className="bg-slate-50 rounded-xl p-3 text-xs text-slate-400 leading-relaxed">
-                🔗 Link de afiliado — você compra direto na {product.store.name} e{' '}
-                <strong className="text-slate-500">não paga nada a mais</strong>
-              </div>
+              {/* Disclaimer minimalista */}
+              <p className="text-xs text-slate-400">
+                🔗 Link de afiliado — preço verificado hoje. Você compra direto na loja oficial.
+              </p>
 
             </div>
           ) : null}
@@ -141,8 +157,18 @@ export default function ProductPage() {
 
       {/* CTA sticky */}
       {!loading && product && (
-        <div className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-slate-100 shadow-lg">
-          <div className="max-w-lg mx-auto px-4 py-3">
+        <div className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+          <div className="max-w-lg mx-auto px-4 pt-2.5 pb-4">
+
+            {/* Trust signal */}
+            <div className="flex items-center justify-center gap-1.5 mb-2.5">
+              <ShieldCheck size={13} className="text-emerald-500 flex-shrink-0" />
+              <p className="text-xs text-slate-500 text-center">
+                Compra 100% segura direto na{' '}
+                <strong className="text-slate-700">{product.store.name}</strong>
+              </p>
+            </div>
+
             <a
               href={product.affiliate_url}
               target="_blank"
@@ -152,12 +178,13 @@ export default function ProductPage() {
                 store_id:   product.store.id,
                 niche_id:   product.niche_id,
               })}
-              className="flex items-center justify-center gap-2 w-full bg-orange-500 hover:bg-orange-400 active:scale-95 text-white font-bold py-4 rounded-2xl text-base transition-all"
+              className="flex items-center justify-center gap-2 w-full bg-orange-500 hover:bg-orange-400 active:scale-95 text-white font-extrabold py-4 rounded-2xl text-base transition-all shadow-md shadow-orange-200"
             >
               <ShoppingCart size={18} />
-              Ver oferta na {product.store.name}
-              <ExternalLink size={14} />
+              {price ? `Pegar por ${formatPrice(price)}` : `Ver oferta na ${product.store.name}`}
+              <ArrowRight size={16} />
             </a>
+
           </div>
         </div>
       )}

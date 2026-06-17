@@ -39,7 +39,7 @@ export default function ProductPage() {
   }
 
   const { price, original_price } = product ?? {};
-  const discount = price && original_price
+  const discount = price && original_price && original_price > price
     ? Math.round((1 - price / original_price) * 100)
     : null;
   const savings = price && original_price && original_price > price
@@ -103,7 +103,7 @@ export default function ProductPage() {
               )}
 
               {/* Bloco de preço */}
-              {price !== undefined ? (
+              {price != null ? (
                 <div className="space-y-2.5">
 
                   {/* Preço atual + original */}

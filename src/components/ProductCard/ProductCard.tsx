@@ -21,7 +21,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, nicheSlug }: ProductCardProps) {
   const { price, original_price, badge, rating, rating_count, name, image_url, affiliate_url, store } = product;
-  const discount = price && original_price ? calcDiscount(price, original_price) : null;
+  const discount = price && original_price && original_price > price ? calcDiscount(price, original_price) : null;
   const { track } = useAnalytics();
 
   const productPath = nicheSlug ? `/${nicheSlug}/${product.id}` : undefined;
@@ -70,7 +70,7 @@ export default function ProductCard({ product, nicheSlug }: ProductCardProps) {
         )}
 
         <div className="mt-auto pt-1">
-          {price !== undefined ? (
+          {price != null ? (
             <div className="mb-2.5">
               <span className="text-lg font-extrabold text-slate-900 tracking-tight">
                 {formatPrice(price)}

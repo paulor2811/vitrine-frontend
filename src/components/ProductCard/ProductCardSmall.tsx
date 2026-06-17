@@ -16,7 +16,7 @@ interface ProductCardSmallProps {
 
 export default function ProductCardSmall({ product, nicheSlug }: ProductCardSmallProps) {
   const { name, image_url, price, original_price, affiliate_url, store, badge } = product;
-  const discount = price && original_price ? Math.round((1 - price / original_price) * 100) : null;
+  const discount = price && original_price && original_price > price ? Math.round((1 - price / original_price) * 100) : null;
   const { track } = useAnalytics();
   const navigate = useNavigate();
 
@@ -58,7 +58,7 @@ export default function ProductCardSmall({ product, nicheSlug }: ProductCardSmal
         <p className="text-xs font-semibold text-slate-800 leading-snug line-clamp-2">{name}</p>
 
         <div className="mt-auto">
-          {price !== undefined ? (
+          {price != null ? (
             <div className="mb-1.5">
               <span className="text-sm font-extrabold text-slate-900">{formatPrice(price)}</span>
               {original_price && (

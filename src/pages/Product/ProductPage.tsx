@@ -103,7 +103,7 @@ export default function ProductPage() {
               )}
 
               {/* Bloco de preço */}
-              {price !== undefined ? (
+              {price != null ? (
                 <div className="space-y-2.5">
 
                   {/* Preço atual + original */}

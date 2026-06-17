@@ -70,7 +70,7 @@ export default function ProductCard({ product, nicheSlug }: ProductCardProps) {
         )}
 
         <div className="mt-auto pt-1">
-          {price !== undefined ? (
+          {price != null ? (
             <div className="mb-2.5">
               <span className="text-lg font-extrabold text-slate-900 tracking-tight">
                 {formatPrice(price)}

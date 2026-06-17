@@ -58,7 +58,7 @@ export default function ProductCardSmall({ product, nicheSlug }: ProductCardSmal
         <p className="text-xs font-semibold text-slate-800 leading-snug line-clamp-2">{name}</p>
 
         <div className="mt-auto">
-          {price !== undefined ? (
+          {price != null ? (
             <div className="mb-1.5">
               <span className="text-sm font-extrabold text-slate-900">{formatPrice(price)}</span>
               {original_price && (

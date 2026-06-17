@@ -21,7 +21,7 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, nicheSlug }: ProductCardProps) {
   const { price, original_price, badge, rating, rating_count, name, image_url, affiliate_url, store } = product;
-  const discount = price && original_price ? calcDiscount(price, original_price) : null;
+  const discount = price && original_price && original_price > price ? calcDiscount(price, original_price) : null;
   const { track } = useAnalytics();
 
   const productPath = nicheSlug ? `/${nicheSlug}/${product.id}` : undefined;

@@ -16,7 +16,7 @@ interface ProductCardSmallProps {
 
 export default function ProductCardSmall({ product, nicheSlug }: ProductCardSmallProps) {
   const { name, image_url, price, original_price, affiliate_url, store, badge } = product;
-  const discount = price && original_price ? Math.round((1 - price / original_price) * 100) : null;
+  const discount = price && original_price && original_price > price ? Math.round((1 - price / original_price) * 100) : null;
   const { track } = useAnalytics();
   const navigate = useNavigate();
 

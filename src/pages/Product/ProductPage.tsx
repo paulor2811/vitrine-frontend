@@ -21,7 +21,17 @@ export default function ProductPage() {
   useEffect(() => {
     if (product) {
       document.title = `${product.name} — Vitrine`;
-      track('product_view', { product_id: product.id, niche_id: product.niche_id });
+      track('product_view', {
+        product_id: product.id,
+        niche_id: product.niche_id,
+        meta_pixel_id: product.niche?.meta_pixel_id,
+        metadata: {
+          product_name: product.name,
+          price: product.price,
+          currency: 'BRL',
+          store_name: product.store?.name,
+        }
+      });
     }
     return () => { document.title = 'Vitrine'; };
   }, [product, track]);
@@ -177,6 +187,13 @@ export default function ProductPage() {
                 product_id: product.id,
                 store_id:   product.store.id,
                 niche_id:   product.niche_id,
+                meta_pixel_id: product.niche?.meta_pixel_id,
+                metadata: {
+                  product_name: product.name,
+                  price: product.price,
+                  currency: 'BRL',
+                  store_name: product.store.name,
+                }
               })}
               className="flex items-center justify-center gap-2 w-full bg-orange-500 hover:bg-orange-400 active:scale-95 text-white font-extrabold py-4 rounded-2xl text-base transition-all shadow-md shadow-orange-200"
             >

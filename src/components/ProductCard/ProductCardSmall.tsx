@@ -12,9 +12,10 @@ function formatPrice(value: number): string {
 interface ProductCardSmallProps {
   product: IProduct;
   nicheSlug?: string;
+  metaPixelId?: string;
 }
 
-export default function ProductCardSmall({ product, nicheSlug }: ProductCardSmallProps) {
+export default function ProductCardSmall({ product, nicheSlug, metaPixelId }: ProductCardSmallProps) {
   const { name, image_url, price, original_price, affiliate_url, store, badge } = product;
   const discount = price && original_price && original_price > price ? Math.round((1 - price / original_price) * 100) : null;
   const { track } = useAnalytics();
@@ -23,7 +24,18 @@ export default function ProductCardSmall({ product, nicheSlug }: ProductCardSmal
   const productPath = nicheSlug ? `/${nicheSlug}/${product.id}` : undefined;
 
   const handleClick = () => {
-    track('product_click', { product_id: product.id, store_id: store.id, niche_id: product.niche_id });
+    track('product_click', {
+      product_id: product.id,
+      store_id: store.id,
+      niche_id: product.niche_id,
+      meta_pixel_id: metaPixelId || product.niche?.meta_pixel_id,
+      metadata: {
+        product_name: name,
+        price: price,
+        currency: 'BRL',
+        store_name: store.name
+      }
+    });
     if (productPath) {
       navigate(productPath);
     } else {

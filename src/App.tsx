@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/hooks/useAuth';
 import Home from '@/pages/Home/Home';
 import Niche from '@/pages/Niche/Niche';
 import ProductPage from '@/pages/Product/ProductPage';
 import SetPasswordModal from '@/components/SetPasswordModal/SetPasswordModal';
+import { metaPixelService } from '@/services/meta-pixel.service';
 
 function AppRoutes() {
   const { needsPasswordSetup } = useAuth();
@@ -23,6 +25,10 @@ function AppRoutes() {
 }
 
 export default function App() {
+  useEffect(() => {
+    metaPixelService.init();
+  }, []);
+
   return (
     <AuthProvider>
       <AppRoutes />

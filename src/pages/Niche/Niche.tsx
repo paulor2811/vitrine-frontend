@@ -11,7 +11,7 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 export default function Niche() {
   const { slug = '' } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { niche, loading: nicheLoading, notFound } = useNiche(slug);
+  const { niche, loading: nicheLoading, notFound, invalidFormat } = useNiche(slug);
   const { products, loading: productsLoading } = useProducts(slug);
   const { track } = useAnalytics();
 
@@ -27,6 +27,27 @@ export default function Niche() {
     }
   }, [niche, track]);
 
+  if (!nicheLoading && invalidFormat) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 bg-slate-50">
+        <span className="text-6xl">⚠️</span>
+        <div className="text-center max-w-sm">
+          <p className="text-slate-800 font-extrabold text-lg mb-2">Endereço inválido</p>
+          <p className="text-slate-600 text-sm leading-relaxed">
+            O endereço "<strong>{slug}</strong>" não segue o padrão do sistema. 
+            Links de categorias não devem conter letras maiúsculas, acentos ou espaços.
+          </p>
+          <p className="text-slate-500 text-xs mt-3 bg-slate-100 p-2.5 rounded-lg border border-slate-200/60">
+            Dica: Use <strong>{slug.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')}</strong> no painel de administração.
+          </p>
+        </div>
+        <button onClick={() => navigate('/')} className="text-orange-500 font-bold text-sm mt-2">
+          ← Voltar ao início
+        </button>
+      </div>
+    );
+  }
+
   if (!nicheLoading && notFound) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-8 bg-slate-50">
@@ -38,6 +59,7 @@ export default function Niche() {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-slate-50">

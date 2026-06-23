@@ -17,9 +17,10 @@ function calcDiscount(price: number, original: number): number {
 interface ProductCardProps {
   product: IProduct;
   nicheSlug?: string;
+  metaPixelId?: string;
 }
 
-export default function ProductCard({ product, nicheSlug }: ProductCardProps) {
+export default function ProductCard({ product, nicheSlug, metaPixelId }: ProductCardProps) {
   const { price, original_price, badge, rating, rating_count, name, image_url, affiliate_url, store } = product;
   const discount = price && original_price && original_price > price ? calcDiscount(price, original_price) : null;
   const { track } = useAnalytics();
@@ -90,7 +91,18 @@ export default function ProductCard({ product, nicheSlug }: ProductCardProps) {
             target="_blank"
             rel="noopener noreferrer sponsored"
             aria-label={`Ver oferta de ${name} na ${store.name}`}
-            onClick={() => track('product_click', { product_id: product.id, store_id: store.id, niche_id: product.niche_id })}
+            onClick={() => track('product_click', {
+              product_id: product.id,
+              store_id: store.id,
+              niche_id: product.niche_id,
+              meta_pixel_id: metaPixelId || product.niche?.meta_pixel_id,
+              metadata: {
+                product_name: name,
+                price: price,
+                currency: 'BRL',
+                store_name: store.name
+              }
+            })}
             className="flex items-center justify-center gap-1.5 w-full bg-orange-500 hover:bg-orange-600 active:scale-95 text-white text-sm font-bold py-2.5 rounded-xl transition-all"
           >
             <ShoppingCart size={14} />

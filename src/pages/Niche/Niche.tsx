@@ -19,7 +19,11 @@ export default function Niche() {
 
   useEffect(() => {
     if (niche) {
-      track('niche_view', { niche_id: niche.id });
+      track('niche_view', {
+        niche_id: niche.id,
+        meta_pixel_id: niche.meta_pixel_id,
+        metadata: { niche_name: niche.name }
+      });
     }
   }, [niche, track]);
 
@@ -84,7 +88,7 @@ export default function Niche() {
         <div className="grid grid-cols-2 gap-3">
           {loading
             ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-            : products.map(p => <ProductCard key={p.id} product={p} nicheSlug={slug} />)
+            : products.map(p => <ProductCard key={p.id} product={p} nicheSlug={slug} metaPixelId={niche?.meta_pixel_id} />)
           }
         </div>
 

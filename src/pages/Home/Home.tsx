@@ -37,7 +37,7 @@ function NicheSection({ niche }: { niche: INiche }) {
               <div key={i} className="flex-shrink-0 w-40 h-64 bg-slate-200 rounded-2xl animate-pulse" />
             ))
           : products.map(product => (
-              <ProductCardSmall key={product.id} product={product} nicheSlug={niche.slug} />
+              <ProductCardSmall key={product.id} product={product} nicheSlug={niche.slug} metaPixelId={niche.meta_pixel_id} />
             ))
         }
       </div>
@@ -125,7 +125,12 @@ export default function Home() {
                     <div key={i} className="flex-shrink-0 w-40 h-64 bg-slate-200 rounded-2xl animate-pulse" />
                   ))
                 : featuredProducts.map(product => (
-                    <ProductCardSmall key={product.id} product={product} nicheSlug={product.niche?.slug} />
+                    <ProductCardSmall
+                      key={product.id}
+                      product={product}
+                      nicheSlug={product.niche?.slug}
+                      metaPixelId={product.niche?.meta_pixel_id}
+                    />
                   ))
               }
             </div>

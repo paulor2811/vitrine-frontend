@@ -14,6 +14,8 @@ export interface IEventPayload {
   utm_content?: string;
   referrer?: string;
   metadata?: Record<string, unknown>;
+  event_id?: string;
+  event_source_url?: string;
 }
 
 export const analyticsService = {

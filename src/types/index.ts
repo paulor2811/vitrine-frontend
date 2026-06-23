@@ -26,6 +26,7 @@ export interface INiche {
   tiktok_url?: string;
   active: boolean;
   products_count?: number;
+  meta_pixel_id?: string;
 }
 
 export type TBadge = 'mais_vendido' | 'top_avaliado' | 'promocao' | 'destaque';
@@ -39,7 +40,7 @@ export interface IProductMedia {
 export interface IProduct {
   id: string;
   niche_id: string;
-  niche?: Pick<INiche, 'id' | 'slug' | 'name' | 'icon'>;
+  niche?: Pick<INiche, 'id' | 'slug' | 'name' | 'icon' | 'meta_pixel_id'>;
   store: IStore;
   name: string;
   description?: string;

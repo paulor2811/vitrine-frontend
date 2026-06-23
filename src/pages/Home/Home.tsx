@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useNiches } from '@/hooks/useNiches';
 import { useProducts } from '@/hooks/useProducts';
 import { useFeaturedProducts } from '@/hooks/useFeaturedProducts';
@@ -50,10 +50,15 @@ export default function Home() {
   const { products: featuredProducts, loading: featuredLoading } = useFeaturedProducts();
   const { track } = useAnalytics();
   const navigate = useNavigate();
+  const pillsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     track('page_view');
   }, [track]);
+
+  function scrollPills(dir: 'left' | 'right') {
+    pillsRef.current?.scrollBy({ left: dir === 'right' ? 200 : -200, behavior: 'smooth' });
+  }
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -94,23 +99,48 @@ export default function Home() {
 
       <div className="max-w-lg mx-auto py-5 space-y-7">
 
-        {/* Category pills */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar px-4">
-          {nichesLoading
-            ? Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex-shrink-0 h-8 w-24 bg-slate-200 rounded-full animate-pulse" />
-              ))
-            : niches.map(niche => (
-                <button
-                  key={niche.slug}
-                  onClick={() => navigate(`/${niche.slug}`)}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-white text-slate-700 border border-slate-200 shadow-sm active:bg-orange-50 active:border-orange-300 active:text-orange-600 transition-colors"
-                >
-                  {niche.icon} {niche.name}
-                </button>
-              ))
-          }
+        {/* Category pills carousel */}
+        <div className="relative">
+          {/* Left arrow — desktop only */}
+          <button
+            onClick={() => scrollPills('left')}
+            className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-10 items-center justify-center w-8 h-8 bg-white shadow-md rounded-full border border-slate-100 text-slate-500 hover:text-orange-500 transition-colors"
+            aria-label="Rolar para esquerda"
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          {/* Fade hint — right edge */}
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-12 bg-gradient-to-l from-slate-100 to-transparent z-10" />
+
+          {/* Scrollable pills */}
+          <div ref={pillsRef} className="flex gap-2 overflow-x-auto no-scrollbar px-4 md:px-10">
+            {nichesLoading
+              ? Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex-shrink-0 h-8 w-24 bg-slate-200 rounded-full animate-pulse" />
+                ))
+              : niches.map(niche => (
+                  <button
+                    key={niche.slug}
+                    onClick={() => navigate(`/${niche.slug}`)}
+                    className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-white text-slate-700 border border-slate-200 shadow-sm active:bg-orange-50 active:border-orange-300 active:text-orange-600 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 transition-colors"
+                  >
+                    {niche.icon} {niche.name}
+                  </button>
+                ))
+            }
+          </div>
+
+          {/* Right arrow — desktop only */}
+          <button
+            onClick={() => scrollPills('right')}
+            className="hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 z-20 items-center justify-center w-8 h-8 bg-white shadow-md rounded-full border border-slate-100 text-slate-500 hover:text-orange-500 transition-colors"
+            aria-label="Rolar para direita"
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
+
 
         {/* Achados do dia */}
         {(featuredLoading || featuredProducts.length > 0) && (

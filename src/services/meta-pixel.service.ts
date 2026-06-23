@@ -42,7 +42,7 @@ export const metaPixelService = {
   },
 
   track: (eventName: string, data?: Record<string, any>, options?: { eventID?: string }, pixelId?: string) => {
-    if (typeof window === 'undefined' || !window.fbq) return;
+    if (typeof window === 'undefined') return;
 
     const targetPixelId = pixelId || config.metaPixelId;
     if (!targetPixelId) return;
@@ -53,7 +53,9 @@ export const metaPixelService = {
     }
 
     // Envia o evento usando trackSingle para evitar disparo cruzado em múltiplos pixels
-    window.fbq('trackSingle', targetPixelId, eventName, data, options);
+    if (window.fbq) {
+      window.fbq('trackSingle', targetPixelId, eventName, data, options);
+    }
   }
 };
 

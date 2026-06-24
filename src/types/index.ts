@@ -54,6 +54,9 @@ export interface IProduct {
   rating_count?: number;
   active: boolean;
   media?: IProductMedia[];
+  views_today?: number;
+  promotion_ends_at?: string | null;
+  updated_at?: string;
 }
 
 export interface IApiResponse<T> {

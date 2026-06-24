@@ -1,10 +1,25 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ShoppingCart } from 'lucide-react';
+import { ArrowRight, Heart, ShoppingCart } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import StarRating from '@/components/ui/StarRating';
 import StoreBadge from '@/components/ui/StoreBadge';
+import AuthModal from '@/components/AuthModal/AuthModal';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useAuth } from '@/hooks/useAuth';
+import { useFavorites } from '@/hooks/useFavorites';
+import config from '@/services/config.service';
 import type { IProduct } from '@/types';
+
+function buildRedirectUrl(productId: string, nicheSlug?: string): string {
+  const params = new URLSearchParams(window.location.search);
+  const utmSource = params.get('utm_source') ?? 'vitrine';
+  const search = new URLSearchParams({
+    utm_source: utmSource,
+    ...(nicheSlug ? { utm_medium: nicheSlug } : {}),
+  });
+  return `${config.apiUrl}/r/${productId}?${search.toString()}`;
+}
 
 function formatPrice(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -24,8 +39,22 @@ export default function ProductCard({ product, nicheSlug, metaPixelId }: Product
   const { price, original_price, badge, rating, rating_count, name, image_url, affiliate_url, store } = product;
   const discount = price && original_price && original_price > price ? calcDiscount(price, original_price) : null;
   const { track } = useAnalytics();
+  const { user } = useAuth();
+  const { favoriteIds, toggle } = useFavorites();
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
+  const isFav = favoriteIds.has(product.id);
   const productPath = nicheSlug ? `/${nicheSlug}/${product.id}` : undefined;
+
+  function handleFavorite(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+    void toggle(product.id);
+  }
 
   const imageArea = (
     <div className="relative aspect-square bg-slate-50">
@@ -46,6 +75,7 @@ export default function ProductCard({ product, nicheSlug, metaPixelId }: Product
   );
 
   return (
+    <>
     <div className="bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col">
       {/* Imagem — clicável para a página do produto */}
       {productPath ? (
@@ -56,7 +86,19 @@ export default function ProductCard({ product, nicheSlug, metaPixelId }: Product
 
       {/* Conteúdo */}
       <div className="p-3 flex flex-col flex-1 gap-2">
-        <StoreBadge store={store} />
+        <div className="flex items-center justify-between">
+          <StoreBadge store={store} />
+          <button
+            onClick={handleFavorite}
+            aria-label={isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+            className="p-1 -mr-1 rounded-full active:scale-90 transition-transform"
+          >
+            <Heart
+              size={18}
+              className={isFav ? 'fill-red-500 text-red-500' : 'text-slate-300'}
+            />
+          </button>
+        </div>
 
         {productPath ? (
           <Link to={productPath} className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2">
@@ -87,7 +129,7 @@ export default function ProductCard({ product, nicheSlug, metaPixelId }: Product
           )}
 
           <a
-            href={affiliate_url}
+            href={buildRedirectUrl(product.id, nicheSlug)}
             target="_blank"
             rel="noopener noreferrer sponsored"
             aria-label={`Ver oferta de ${name} na ${store.name}`}
@@ -112,5 +154,8 @@ export default function ProductCard({ product, nicheSlug, metaPixelId }: Product
         </div>
       </div>
     </div>
+
+    {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+    </>
   );
 }

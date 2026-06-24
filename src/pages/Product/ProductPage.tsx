@@ -1,15 +1,29 @@
 import { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, ShoppingCart, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Eye, ShoppingCart, ShieldCheck } from 'lucide-react';
 import MediaCarousel from '@/components/MediaCarousel/MediaCarousel';
 import Badge from '@/components/ui/Badge';
+import Countdown from '@/components/ui/Countdown';
 import StarRating from '@/components/ui/StarRating';
 import StoreBadge from '@/components/ui/StoreBadge';
 import { useProduct } from '@/hooks/useProduct';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useSeoMeta } from '@/hooks/useSeoMeta';
+import config from '@/services/config.service';
 
 function formatPrice(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+function isVerifiedToday(updatedAt: string): boolean {
+  return new Date(updatedAt).toDateString() === new Date().toDateString();
+}
+
+function daysAgo(updatedAt: string): string {
+  const days = Math.floor((Date.now() - new Date(updatedAt).getTime()) / 86_400_000);
+  if (days === 0) return 'hoje';
+  if (days === 1) return 'há 1 dia';
+  return `há ${days} dias`;
 }
 
 export default function ProductPage() {
@@ -18,9 +32,31 @@ export default function ProductPage() {
   const { product, loading, notFound } = useProduct(nicheSlug, productId);
   const { track } = useAnalytics();
 
+  useSeoMeta({
+    title:       product ? `${product.name} — ${product.store?.name ?? ''} | Vitrine` : 'Vitrine',
+    description: product?.description ?? product?.name,
+    ogImage:     product?.image_url ?? undefined,
+    ogUrl:       product ? `${config.appUrl}/${nicheSlug}/${product.id}` : undefined,
+    jsonLd:      product ? {
+      '@context': 'https://schema.org',
+      '@type':    'Product',
+      name:        product.name,
+      description: product.description ?? product.name,
+      image:       product.image_url ?? undefined,
+      url:         `${config.appUrl}/${nicheSlug}/${product.id}`,
+      offers: {
+        '@type':       'Offer',
+        priceCurrency: 'BRL',
+        price:          product.price?.toFixed(2),
+        url:            `${config.apiUrl}/r/${product.id}`,
+        availability:  'https://schema.org/InStock',
+        seller: { '@type': 'Organization', name: product.store?.name },
+      },
+    } : undefined,
+  });
+
   useEffect(() => {
     if (product) {
-      document.title = `${product.name} — Vitrine`;
       track('product_view', {
         product_id: product.id,
         niche_id: product.niche_id,
@@ -33,7 +69,6 @@ export default function ProductPage() {
         }
       });
     }
-    return () => { document.title = 'Vitrine'; };
   }, [product, track]);
 
   if (!loading && notFound) {
@@ -149,6 +184,26 @@ export default function ProductPage() {
                 <p className="text-slate-400 text-sm">Ver preço na loja</p>
               )}
 
+              {/* Countdown de promoção */}
+              {product.promotion_ends_at && (
+                <Countdown endsAt={product.promotion_ends_at} />
+              )}
+
+              {/* Social proof */}
+              <div className="flex flex-wrap gap-2">
+                {(product.views_today ?? 0) >= 5 && (
+                  <span className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-100 px-2.5 py-1.5 rounded-lg">
+                    <Eye size={13} className="text-slate-400" />
+                    {product.views_today} pessoas viram hoje
+                  </span>
+                )}
+                {product.updated_at && (
+                  <span className="text-xs font-semibold text-slate-500 bg-slate-50 border border-slate-100 px-2.5 py-1.5 rounded-lg">
+                    {isVerifiedToday(product.updated_at) ? '✓ Verificado hoje' : `Verificado ${daysAgo(product.updated_at)}`}
+                  </span>
+                )}
+              </div>
+
               {/* Descrição */}
               {product.description && (
                 <p className="text-sm text-slate-600 leading-relaxed">{product.description}</p>
@@ -180,7 +235,7 @@ export default function ProductPage() {
             </div>
 
             <a
-              href={product.affiliate_url}
+              href={`${config.apiUrl}/r/${product.id}?utm_source=${new URLSearchParams(window.location.search).get('utm_source') ?? 'vitrine'}&utm_medium=${nicheSlug}`}
               target="_blank"
               rel="noopener noreferrer sponsored"
               onClick={() => track('product_click', {

@@ -1,9 +1,24 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart } from 'lucide-react';
+import { Heart, ShoppingCart } from 'lucide-react';
 import Badge from '@/components/ui/Badge';
 import StoreBadge from '@/components/ui/StoreBadge';
+import AuthModal from '@/components/AuthModal/AuthModal';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useAuth } from '@/hooks/useAuth';
+import { useFavorites } from '@/hooks/useFavorites';
+import config from '@/services/config.service';
 import type { IProduct } from '@/types';
+
+function buildRedirectUrl(productId: string, nicheSlug?: string): string {
+  const params = new URLSearchParams(window.location.search);
+  const utmSource = params.get('utm_source') ?? 'vitrine';
+  const search = new URLSearchParams({
+    utm_source: utmSource,
+    ...(nicheSlug ? { utm_medium: nicheSlug } : {}),
+  });
+  return `${config.apiUrl}/r/${productId}?${search.toString()}`;
+}
 
 function formatPrice(value: number): string {
   return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -20,6 +35,20 @@ export default function ProductCardSmall({ product, nicheSlug, metaPixelId }: Pr
   const discount = price && original_price && original_price > price ? Math.round((1 - price / original_price) * 100) : null;
   const { track } = useAnalytics();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { favoriteIds, toggle } = useFavorites();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  const isFav = favoriteIds.has(product.id);
+
+  function handleFavorite(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!user) {
+      setShowAuthModal(true);
+      return;
+    }
+    void toggle(product.id);
+  }
 
   const productPath = nicheSlug ? `/${nicheSlug}/${product.id}` : undefined;
 
@@ -39,11 +68,12 @@ export default function ProductCardSmall({ product, nicheSlug, metaPixelId }: Pr
     if (productPath) {
       navigate(productPath);
     } else {
-      window.open(affiliate_url, '_blank', 'noopener,noreferrer');
+      window.open(buildRedirectUrl(product.id, nicheSlug), '_blank', 'noopener,noreferrer');
     }
   };
 
   return (
+    <>
     <div
       onClick={handleClick}
       className="flex-shrink-0 w-40 bg-white rounded-2xl overflow-hidden shadow-sm flex flex-col active:scale-95 transition-transform cursor-pointer"
@@ -62,6 +92,16 @@ export default function ProductCardSmall({ product, nicheSlug, metaPixelId }: Pr
             -{discount}%
           </div>
         )}
+        <button
+          onClick={handleFavorite}
+          aria-label={isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+          className="absolute bottom-1.5 right-1.5 bg-white/80 rounded-full p-1 active:scale-90 transition-transform"
+        >
+          <Heart
+            size={13}
+            className={isFav ? 'fill-red-500 text-red-500' : 'text-slate-400'}
+          />
+        </button>
       </div>
 
       <div className="p-2.5 flex flex-col flex-1 gap-1.5">
@@ -89,5 +129,8 @@ export default function ProductCardSmall({ product, nicheSlug, metaPixelId }: Pr
         </div>
       </div>
     </div>
+
+    {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
+    </>
   );
 }

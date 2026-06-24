@@ -1,12 +1,29 @@
-import { useCallback, useEffect, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  createElement,
+  type ReactNode,
+} from 'react';
 import type { IProduct } from '@/types';
 import { favoriteService } from '@/services/favorite.service';
 import { useAuth } from './useAuth';
 
-export function useFavorites() {
+interface IFavoritesContext {
+  favorites: IProduct[];
+  loading: boolean;
+  favoriteIds: Set<string>;
+  toggle: (productId: string) => Promise<void>;
+}
+
+const FavoritesContext = createContext<IFavoritesContext | null>(null);
+
+export function FavoritesProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [favorites, setFavorites] = useState<IProduct[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [favorites, setFavorites]     = useState<IProduct[]>([]);
+  const [loading, setLoading]         = useState(false);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -31,7 +48,6 @@ export function useFavorites() {
 
     const isFav = favoriteIds.has(productId);
 
-    // optimistic update
     setFavoriteIds(prev => {
       const next = new Set(prev);
       isFav ? next.delete(productId) : next.add(productId);
@@ -46,7 +62,6 @@ export function useFavorites() {
         await favoriteService.add(productId);
       }
     } catch {
-      // revert on failure
       setFavoriteIds(prev => {
         const next = new Set(prev);
         isFav ? next.add(productId) : next.delete(productId);
@@ -55,5 +70,15 @@ export function useFavorites() {
     }
   }, [user, favoriteIds]);
 
-  return { favorites, loading, favoriteIds, toggle };
+  return createElement(
+    FavoritesContext.Provider,
+    { value: { favorites, loading, favoriteIds, toggle } },
+    children,
+  );
+}
+
+export function useFavorites(): IFavoritesContext {
+  const ctx = useContext(FavoritesContext);
+  if (!ctx) throw new Error('useFavorites must be used within FavoritesProvider');
+  return ctx;
 }

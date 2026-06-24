@@ -7,6 +7,8 @@ import SkeletonCard from '@/components/ui/SkeletonCard';
 import { useNiche } from '@/hooks/useNiche';
 import { useProducts } from '@/hooks/useProducts';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useSeoMeta } from '@/hooks/useSeoMeta';
+import config from '@/services/config.service';
 
 export default function Niche() {
   const { slug = '' } = useParams<{ slug: string }>();
@@ -16,6 +18,14 @@ export default function Niche() {
   const { track } = useAnalytics();
 
   const loading = nicheLoading || productsLoading;
+
+  useSeoMeta({
+    title:       niche ? `${niche.icon} ${niche.name} — Melhores produtos | Vitrine` : 'Vitrine',
+    description: niche?.description
+      ? `${niche.description} — Seleção dos melhores produtos de ${niche.name} com preços e links diretos para as lojas.`
+      : undefined,
+    ogUrl: niche ? `${config.appUrl}/${niche.slug}` : undefined,
+  });
 
   useEffect(() => {
     if (niche) {

@@ -1,15 +1,30 @@
 import { useState } from 'react';
-import { LogIn, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Heart, LogIn, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useFavorites } from '@/hooks/useFavorites';
 import AuthModal from '@/components/AuthModal/AuthModal';
 
 export default function AuthButton() {
   const { user, logout } = useAuth();
+  const { favoriteIds } = useFavorites();
   const [showModal, setShowModal] = useState(false);
 
   if (user) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
+        <Link
+          to="/favoritos"
+          aria-label="Meus favoritos"
+          className="relative p-1.5 text-slate-400 active:text-red-500 transition-colors"
+        >
+          <Heart size={18} />
+          {favoriteIds.size > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center leading-none">
+              {favoriteIds.size > 9 ? '9+' : favoriteIds.size}
+            </span>
+          )}
+        </Link>
         {user.avatar_url ? (
           <img src={user.avatar_url} alt={user.name} className="w-7 h-7 rounded-full object-cover" />
         ) : (

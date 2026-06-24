@@ -27,6 +27,3 @@ body {
 .pills-track:hover {
   animation-play-state: paused;
 }
-@media (hover: none) {
-  .pills-track { animation: none; }
-}

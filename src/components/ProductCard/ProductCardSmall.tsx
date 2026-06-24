@@ -95,10 +95,10 @@ export default function ProductCardSmall({ product, nicheSlug, metaPixelId }: Pr
         <button
           onClick={handleFavorite}
           aria-label={isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-          className="absolute bottom-1.5 right-1.5 bg-white/80 rounded-full p-1 active:scale-90 transition-transform"
+          className="absolute bottom-1.5 right-1.5 bg-white/90 rounded-full p-1.5 active:scale-90 transition-transform shadow-sm"
         >
           <Heart
-            size={13}
+            size={16}
             className={isFav ? 'fill-red-500 text-red-500' : 'text-slate-400'}
           />
         </button>

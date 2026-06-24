@@ -51,14 +51,41 @@ export default function Home() {
   const { track } = useAnalytics();
   const navigate = useNavigate();
   const pillsRef = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number>(0);
+  const pausedRef = useRef(false);
+  const dirRef = useRef(1); // 1 = right, -1 = left
 
   useEffect(() => {
     track('page_view');
   }, [track]);
 
+  // Auto-scroll animation — only on desktop, starts after niches load
+  useEffect(() => {
+    if (nichesLoading || niches.length === 0) return;
+    const el = pillsRef.current;
+    if (!el) return;
+
+    // Only animate on non-touch devices
+    if (window.matchMedia('(hover: none)').matches) return;
+
+    function step() {
+      if (!pausedRef.current && el) {
+        el.scrollLeft += 0.4 * dirRef.current;
+        // Reverse at edges
+        if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 2) dirRef.current = -1;
+        if (el.scrollLeft <= 0) dirRef.current = 1;
+      }
+      rafRef.current = requestAnimationFrame(step);
+    }
+
+    rafRef.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [nichesLoading, niches.length]);
+
   function scrollPills(dir: 'left' | 'right') {
     pillsRef.current?.scrollBy({ left: dir === 'right' ? 200 : -200, behavior: 'smooth' });
   }
+
 
   return (
     <div className="min-h-screen bg-slate-100">
@@ -113,7 +140,13 @@ export default function Home() {
           {/* Scrollable pills + fade edges */}
           <div className="relative flex-1 min-w-0">
             <div className="pointer-events-none absolute left-0 top-0 h-full w-6 bg-gradient-to-r from-slate-100 to-transparent z-10" />
-            <div ref={pillsRef} className="flex gap-2 overflow-x-auto no-scrollbar px-1">
+            <div
+              ref={pillsRef}
+              className="flex gap-2 overflow-x-auto no-scrollbar px-1"
+              onMouseEnter={() => { pausedRef.current = true; }}
+              onMouseLeave={() => { pausedRef.current = false; }}
+              onTouchStart={() => { pausedRef.current = true; }}
+            >
               {nichesLoading
                 ? Array.from({ length: 5 }).map((_, i) => (
                     <div key={i} className="flex-shrink-0 h-8 w-24 bg-slate-200 rounded-full animate-pulse" />

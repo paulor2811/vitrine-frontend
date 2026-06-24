@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useNiches } from '@/hooks/useNiches';
 import { useProducts } from '@/hooks/useProducts';
 import { useFeaturedProducts } from '@/hooks/useFeaturedProducts';
@@ -50,41 +50,10 @@ export default function Home() {
   const { products: featuredProducts, loading: featuredLoading } = useFeaturedProducts();
   const { track } = useAnalytics();
   const navigate = useNavigate();
-  const pillsRef = useRef<HTMLDivElement>(null);
-  const rafRef = useRef<number>(0);
-  const pausedRef = useRef(false);
-  const dirRef = useRef(1); // 1 = right, -1 = left
 
   useEffect(() => {
     track('page_view');
   }, [track]);
-
-  // Auto-scroll animation — only on desktop, starts after niches load
-  useEffect(() => {
-    if (nichesLoading || niches.length === 0) return;
-    const el = pillsRef.current;
-    if (!el) return;
-
-    // Only animate on non-touch devices
-    if (window.matchMedia('(hover: none)').matches) return;
-
-    function step() {
-      if (!pausedRef.current && el) {
-        el.scrollLeft += 0.4 * dirRef.current;
-        // Reverse at edges
-        if (el.scrollLeft + el.clientWidth >= el.scrollWidth - 2) dirRef.current = -1;
-        if (el.scrollLeft <= 0) dirRef.current = 1;
-      }
-      rafRef.current = requestAnimationFrame(step);
-    }
-
-    rafRef.current = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [nichesLoading, niches.length]);
-
-  function scrollPills(dir: 'left' | 'right') {
-    pillsRef.current?.scrollBy({ left: dir === 'right' ? 200 : -200, behavior: 'smooth' });
-  }
 
 
   return (
@@ -126,55 +95,33 @@ export default function Home() {
 
       <div className="max-w-lg mx-auto py-5 space-y-7">
 
-        {/* Category pills carousel */}
-        <div className="group flex items-center gap-1 px-3">
-          {/* Left arrow — desktop only, appears on hover */}
-          <button
-            onClick={() => scrollPills('left')}
-            className="hidden md:flex flex-shrink-0 items-center justify-center w-7 h-7 rounded-full text-slate-400 hover:text-orange-500 hover:bg-white hover:shadow-sm transition-all opacity-0 group-hover:opacity-100"
-            aria-label="Rolar para esquerda"
-          >
-            <ChevronLeft size={18} />
-          </button>
+        {/* Category pills — auto-scrolling marquee on desktop, static on mobile */}
+        <div className="overflow-hidden relative">
+          {/* Fade edges */}
+          <div className="pointer-events-none absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-slate-100 to-transparent z-10" />
+          <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-slate-100 to-transparent z-10" />
 
-          {/* Scrollable pills + fade edges */}
-          <div className="relative flex-1 min-w-0">
-            <div className="pointer-events-none absolute left-0 top-0 h-full w-6 bg-gradient-to-r from-slate-100 to-transparent z-10" />
-            <div
-              ref={pillsRef}
-              className="flex gap-2 overflow-x-auto no-scrollbar px-1"
-              onMouseEnter={() => { pausedRef.current = true; }}
-              onMouseLeave={() => { pausedRef.current = false; }}
-              onTouchStart={() => { pausedRef.current = true; }}
-            >
-              {nichesLoading
-                ? Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="flex-shrink-0 h-8 w-24 bg-slate-200 rounded-full animate-pulse" />
-                  ))
-                : niches.map(niche => (
-                    <button
-                      key={niche.slug}
-                      onClick={() => navigate(`/${niche.slug}`)}
-                      className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-white text-slate-700 border border-slate-200 shadow-sm active:bg-orange-50 active:border-orange-300 active:text-orange-600 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 transition-colors"
-                    >
-                      {niche.icon} {niche.name}
-                    </button>
-                  ))
-              }
+          {nichesLoading ? (
+            <div className="flex gap-2 px-4">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex-shrink-0 h-8 w-24 bg-slate-200 rounded-full animate-pulse" />
+              ))}
             </div>
-            <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-slate-100 to-transparent z-10" />
-          </div>
-
-          {/* Right arrow — desktop only, appears on hover */}
-          <button
-            onClick={() => scrollPills('right')}
-            className="hidden md:flex flex-shrink-0 items-center justify-center w-7 h-7 rounded-full text-slate-400 hover:text-orange-500 hover:bg-white hover:shadow-sm transition-all opacity-0 group-hover:opacity-100"
-            aria-label="Rolar para direita"
-          >
-            <ChevronRight size={18} />
-          </button>
+          ) : (
+            <div className="pills-track">
+              {/* Original + clone for seamless loop */}
+              {[...niches, ...niches].map((niche, i) => (
+                <button
+                  key={`${niche.slug}-${i}`}
+                  onClick={() => navigate(`/${niche.slug}`)}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-white text-slate-700 border border-slate-200 shadow-sm active:bg-orange-50 active:border-orange-300 active:text-orange-600 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 transition-colors"
+                >
+                  {niche.icon} {niche.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
-
 
         {/* Achados do dia */}
         {(featuredLoading || featuredProducts.length > 0) && (

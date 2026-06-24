@@ -13,3 +13,20 @@ body {
   to   { transform: translateY(0); }
 }
 .animate-slide-up { animation: slide-up 0.25s ease-out; }
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.pills-track {
+  display: flex;
+  gap: 0.5rem;
+  width: max-content;
+  animation: marquee 18s linear infinite;
+}
+.pills-track:hover {
+  animation-play-state: paused;
+}
+@media (hover: none) {
+  .pills-track { animation: none; }
+}

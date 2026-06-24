@@ -55,6 +55,7 @@ export default function Home() {
     track('page_view');
   }, [track]);
 
+
   return (
     <div className="min-h-screen bg-slate-100">
 
@@ -94,22 +95,56 @@ export default function Home() {
 
       <div className="max-w-lg mx-auto py-5 space-y-7">
 
-        {/* Category pills */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar px-4">
-          {nichesLoading
-            ? Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex-shrink-0 h-8 w-24 bg-slate-200 rounded-full animate-pulse" />
-              ))
-            : niches.map(niche => (
+        {/* Category pills — auto-scrolling marquee on desktop, static on mobile */}
+        <div className="space-y-2.5">
+          <div className="overflow-hidden relative">
+            {/* Fade edges */}
+            <div className="pointer-events-none absolute left-0 top-0 h-full w-8 bg-gradient-to-r from-slate-100 to-transparent z-10" />
+            <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-slate-100 to-transparent z-10" />
+
+            {nichesLoading ? (
+              <div className="flex gap-2 px-4">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="flex-shrink-0 h-8 w-24 bg-slate-200 rounded-full animate-pulse" />
+                ))}
+              </div>
+            ) : (
+              <div className="pills-track">
+                {/* Original + clone for seamless loop */}
+                {[...niches, ...niches].map((niche, i) => (
+                  <button
+                    key={`${niche.slug}-${i}`}
+                    onClick={() => navigate(`/${niche.slug}`)}
+                    className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-white text-slate-700 border border-slate-200 shadow-sm active:bg-orange-50 active:border-orange-300 active:text-orange-600 hover:bg-orange-50 hover:border-orange-300 hover:text-orange-600 transition-colors"
+                  >
+                    {niche.icon} {niche.name}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Dot navigation — quick access to any niche */}
+          {!nichesLoading && niches.length > 0 && (
+            <div className="flex items-center justify-center gap-2 px-4 flex-wrap">
+              {niches.map(niche => (
                 <button
                   key={niche.slug}
                   onClick={() => navigate(`/${niche.slug}`)}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-2 rounded-full text-xs font-bold bg-white text-slate-700 border border-slate-200 shadow-sm active:bg-orange-50 active:border-orange-300 active:text-orange-600 transition-colors"
+                  title={niche.name}
+                  className="group relative flex flex-col items-center"
                 >
-                  {niche.icon} {niche.name}
+                  <span className="text-base leading-none transition-transform group-hover:scale-125 group-active:scale-110">
+                    {niche.icon}
+                  </span>
+                  {/* Tooltip with name */}
+                  <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-500 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                    {niche.name}
+                  </span>
                 </button>
-              ))
-          }
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Achados do dia */}

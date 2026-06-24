@@ -22,7 +22,7 @@ body {
   display: flex;
   gap: 0.5rem;
   width: max-content;
-  animation: marquee 18s linear infinite;
+  animation: marquee 72s linear infinite;
 }
 .pills-track:hover {
   animation-play-state: paused;
